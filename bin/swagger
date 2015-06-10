@@ -215,12 +215,12 @@ EOF;
                 $decodedResource = json_decode($outputResource);
                 foreach ($decodedResource->apis as $index => &$outputThing) {
                     $resourcePath = $outputThing->path;
-                    if ($options['external']) {
-                        if (strpos($resourcePath, '/external-') === 0) {
+                    if (strpos($resourcePath, '/external-') === 0) {
+                        if ($options['internal']) {
                             unset($decodedResource->apis[$index]);
                         }
-                    } elseif ($options['internal']) {
-                        if (strpos($resourcePath, '/external-') != 0) {
+                    } else {
+                        if ($options['external']) {
                             unset($decodedResource->apis[$index]);
                         }
                     }
