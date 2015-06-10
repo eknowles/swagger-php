@@ -202,6 +202,37 @@ EOF;
         $output[$resourceName] = $json;
     }
     if ($output) {
+        // --> start BBC bit
+        $newOutput = array();
+        foreach($output as $apiName => $outputResource) {
+            $decodedResource = json_decode($outputResource);
+            foreach ($decodedResource->apis as $index => &$outputThing) {
+                $resourcePath = $outputThing->path;
+                if (strpos($resourcePath, '/external-') === 0) {
+                } else {
+                    unset($decodedResource->apis[$index]);
+                }
+            }
+
+            $newOutput[$apiName] = $decodedResource;
+            $newOutput[$apiName]->apis = array_values($newOutput[$apiName]->apis);
+        }
+        foreach($newOutput as $key => $value){
+            if (!count($value->apis)) {
+                unset($newOutput[$key]);
+            } else {
+                $newOutput[$key] = json_encode($value, JSON_PRETTY_PRINT);
+            }
+        }
+        $output = $newOutput;
+        foreach ($resourceList['apis'] as $key => $value) {
+            $prettyPath = preg_replace("/\/(.+?).{format}/", "$1", $value['path']);
+            if (!$output[$prettyPath]) {
+                unset($resourceList['apis'][$key]);
+            }
+        }
+        $resourceList['apis'] = array_values($resourceList['apis']);
+        // <-- end BBC bit
         if (file_exists($outputPath) && !is_dir($outputPath)) {
             throw new RuntimeException(
             sprintf('[%s] is not a directory', $outputPath)
