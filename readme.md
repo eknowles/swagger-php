@@ -35,3 +35,24 @@ Features
   * https://github.com/outeredge/SwaggerModule a ZF2 Module implementing swagger-php
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/zircote/swagger-php/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
+
+BBC Swagger
+---
+
+Use --external option to only output APIs that contain paths starting with 'external'.
+Use --internal option to only output APIs that contain paths **not** starting with 'external'.
+
+Example shell command
+
+```
+#!/bin/sh
+mkdir ~/BBC/mdt-mobileapi/public/swagger-app-definition/external
+cd ~/BBC/mdt-mobileapi/public/swagger-app-definition/external
+php /Users/ed/PhpstormProjects/swagger-php/bin/swagger /Users/ed/BBC/mdt-mobileapi/application/MobileApi/ -o ~/BBC/mdt-mobileapi/public/swagger-app-definition/external --external
+
+
+mkdir ~/BBC/mdt-mobileapi/public/swagger-app-definition/internal
+cd ~/BBC/mdt-mobileapi/public/swagger-app-definition/internal
+php /Users/ed/PhpstormProjects/swagger-php/bin/swagger /Users/ed/BBC/mdt-mobileapi/application/MobileApi/ -o ~/BBC/mdt-mobileapi/public/swagger-app-definition/internal --internal
+```
