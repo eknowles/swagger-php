@@ -22,7 +22,7 @@ namespace Swagger\Annotations;
  * @subpackage
  */
 use Swagger\Annotations\AbstractAnnotation;
-use Swagger\Annotations\Items;
+//use Swagger\Annotations\Items;
 use Swagger\Annotations\Operation;
 use Swagger\Annotations\Parameter;
 use Swagger\Annotations\Property;

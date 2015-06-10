@@ -159,7 +159,8 @@ abstract class AbstractAnnotation
 
     /**
      * Example: @Annotation("hello", 124) would call setNestedValues with array("hello", 123)
-     * @param array $values
+     * @param $value
+     * @internal param array $values
      */
     protected function setNestedValue($value)
     {
@@ -180,7 +181,9 @@ abstract class AbstractAnnotation
 
     /**
      * @param string $json
-     * @throws AnnotationException     */
+     * @return mixed
+     * @throws AnnotationException
+     */
     public static function decode($json)
     {
         $json = preg_replace(self::REGEX, self::REPLACE, $json);

@@ -54,9 +54,7 @@ class Compiler
         $this->version = trim(file_get_contents(dirname(__DIR__ . '/VERSION')));
         $phar = new \Phar($pharFile, 0, 'swagger.phar');
         $phar->setSignatureAlgorithm(\Phar::SHA1);
-
         $phar->startBuffering();
-
         $finder = new Finder();
         $finder->files()
             ->ignoreVCS(true)
