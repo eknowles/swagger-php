@@ -53,6 +53,8 @@ try {
         'suffix' => '.{format}',
         'help' => false,
         'debug' => false,
+        'external' => false,
+        'internal' => false
     );
     $aliases = array(
         'o' => 'output',
@@ -115,6 +117,10 @@ try {
 Generate Swagger JSON documents for a PHP project.
 
 Usage: swagger /path/to/project [--output /path/to/docs] ...
+
+  --internal          Filter output to only include paths that do NOT
+                      start with '/external-'.
+  --external          Filter output to only include external paths.
 
   -o, --output        Directory to store the generated json documents.
   -u, --url           Url to the output folder. (api-docs basePath)
@@ -203,35 +209,42 @@ EOF;
     }
     if ($output) {
         // --> start BBC bit
-        $newOutput = array();
-        foreach($output as $apiName => $outputResource) {
-            $decodedResource = json_decode($outputResource);
-            foreach ($decodedResource->apis as $index => &$outputThing) {
-                $resourcePath = $outputThing->path;
-                if (strpos($resourcePath, '/external-') === 0) {
+        if ($options['external'] || $options['internal']) {
+            $newOutput = array();
+            foreach ($output as $apiName => $outputResource) {
+                $decodedResource = json_decode($outputResource);
+                foreach ($decodedResource->apis as $index => &$outputThing) {
+                    $resourcePath = $outputThing->path;
+                    if ($options['external']) {
+                        if (strpos($resourcePath, '/external-') === 0) {
+                            unset($decodedResource->apis[$index]);
+                        }
+                    } elseif ($options['internal']) {
+                        if (strpos($resourcePath, '/external-') != 0) {
+                            unset($decodedResource->apis[$index]);
+                        }
+                    }
+                }
+
+                $newOutput[$apiName] = $decodedResource;
+                $newOutput[$apiName]->apis = array_values($newOutput[$apiName]->apis);
+            }
+            foreach ($newOutput as $key => $value) {
+                if (!count($value->apis)) {
+                    unset($newOutput[$key]);
                 } else {
-                    unset($decodedResource->apis[$index]);
+                    $newOutput[$key] = json_encode($value, JSON_PRETTY_PRINT);
                 }
             }
-
-            $newOutput[$apiName] = $decodedResource;
-            $newOutput[$apiName]->apis = array_values($newOutput[$apiName]->apis);
-        }
-        foreach($newOutput as $key => $value){
-            if (!count($value->apis)) {
-                unset($newOutput[$key]);
-            } else {
-                $newOutput[$key] = json_encode($value, JSON_PRETTY_PRINT);
+            $output = $newOutput;
+            foreach ($resourceList['apis'] as $key => $value) {
+                $prettyPath = preg_replace("/\/(.+?).{format}/", "$1", $value['path']);
+                if (!$output[$prettyPath]) {
+                    unset($resourceList['apis'][$key]);
+                }
             }
+            $resourceList['apis'] = array_values($resourceList['apis']);
         }
-        $output = $newOutput;
-        foreach ($resourceList['apis'] as $key => $value) {
-            $prettyPath = preg_replace("/\/(.+?).{format}/", "$1", $value['path']);
-            if (!$output[$prettyPath]) {
-                unset($resourceList['apis'][$key]);
-            }
-        }
-        $resourceList['apis'] = array_values($resourceList['apis']);
         // <-- end BBC bit
         if (file_exists($outputPath) && !is_dir($outputPath)) {
             throw new RuntimeException(
